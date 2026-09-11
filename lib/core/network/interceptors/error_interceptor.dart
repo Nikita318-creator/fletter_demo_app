@@ -4,24 +4,27 @@ import '../network_exception.dart';
 class ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    ServerException exception;
+    NetworkException exception;
 
     switch (err.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
+        exception = const TimeoutException();
+        break;
       case DioExceptionType.connectionError:
-        exception = NetworkException('Network timeout or no connection');
+        exception = const NoInternetException();
         break;
       case DioExceptionType.badResponse:
         exception = ServerException(
-          'Server response error: ${err.response?.statusCode}',
+          'Server returned ${err.response?.statusCode}',
         );
         break;
       default:
-        exception = ServerException('Unexpected network error');
+        exception = const ServerException();
     }
 
+    // Пробрасываем кастомное исключение дальше через DioException.error
     handler.reject(
       DioException(
         requestOptions: err.requestOptions,

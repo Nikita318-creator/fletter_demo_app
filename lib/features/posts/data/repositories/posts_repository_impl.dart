@@ -1,4 +1,4 @@
-import 'dart:convert';
+import '../../../../core/network/network_exception.dart';
 import '../../../../core/result/result.dart';
 import '../../domain/entities/post_entity.dart';
 import '../../domain/repositories/posts_repository.dart';
@@ -19,28 +19,28 @@ class PostsRepositoryImpl implements PostsRepository {
   Future<Result<List<PostEntity>>> getPosts() async {
     try {
       final remotePosts = await remoteDataSource.getPosts();
-      final favorites = await localDataSource.getFavoriteIds();
+      final favoriteIds = await localDataSource.getFavoriteIds();
 
       final entities = remotePosts
-          .map((dto) => dto.toEntity(isFavorite: favorites.contains(dto.id)))
+          .map((dto) => dto.toEntity(isFavorite: favoriteIds.contains(dto.id)))
           .toList();
 
       await localDataSource.cachePosts(remotePosts);
       return Success(entities);
-    } catch (_) {
+    } catch (e) {
       try {
         final cachedPosts = await localDataSource.getCachedPosts();
         if (cachedPosts.isNotEmpty) {
-          final favorites = await localDataSource.getFavoriteIds();
+          final favoriteIds = await localDataSource.getFavoriteIds();
           final entities = cachedPosts
               .map(
-                (dto) => dto.toEntity(isFavorite: favorites.contains(dto.id)),
+                (dto) => dto.toEntity(isFavorite: favoriteIds.contains(dto.id)),
               )
               .toList();
           return Success(entities);
         }
-        return const Failure(NetworkFailure());
-      } catch (e) {
+        return Failure(_mapExceptionToFailure(e));
+      } catch (_) {
         return const Failure(CacheFailure());
       }
     }
@@ -51,16 +51,16 @@ class PostsRepositoryImpl implements PostsRepository {
     try {
       final postDto = await remoteDataSource.getPost(id);
       final userDto = await remoteDataSource.getUser(postDto.userId);
-      final favorites = await localDataSource.getFavoriteIds();
+      final favoriteIds = await localDataSource.getFavoriteIds();
 
-      return Success(
-        postDto.toEntity(
-          authorName: userDto.name,
-          isFavorite: favorites.contains(postDto.id),
-        ),
+      final entity = postDto.toEntity(
+        authorName: userDto.name,
+        isFavorite: favoriteIds.contains(postDto.id),
       );
-    } catch (_) {
-      return const Failure(ServerFailure());
+
+      return Success(entity);
+    } catch (e) {
+      return Failure(_mapExceptionToFailure(e));
     }
   }
 
@@ -69,7 +69,7 @@ class PostsRepositoryImpl implements PostsRepository {
     try {
       final favorites = await localDataSource.getFavorites();
       return Success(favorites);
-    } catch (e) {
+    } catch (_) {
       return const Failure(CacheFailure());
     }
   }
@@ -79,8 +79,15 @@ class PostsRepositoryImpl implements PostsRepository {
     try {
       await localDataSource.toggleFavorite(post);
       return const Success(null);
-    } catch (e) {
+    } catch (_) {
       return const Failure(CacheFailure());
     }
+  }
+
+  AppFailure _mapExceptionToFailure(Object e) {
+    if (e is NoInternetException || e is TimeoutException) {
+      return const NetworkFailure();
+    }
+    return const ServerFailure();
   }
 }

@@ -4,7 +4,7 @@ class PostDto {
   final String title;
   final String body;
 
-  PostDto({
+  const PostDto({
     required this.id,
     required this.userId,
     required this.title,

@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import '../../../../core/network/dio_client.dart';
 import '../models/post_dto.dart';
 import '../models/user_dto.dart';
@@ -18,18 +17,20 @@ class PostsRemoteDataSourceImpl implements PostsRemoteDataSource {
   Future<List<PostDto>> getPosts() async {
     final response = await _client.dio.get('/posts');
     final list = response.data as List;
-    return list.map((e) => PostDto.fromJson(e)).toList();
+    return list
+        .map((e) => PostDto.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
   Future<PostDto> getPost(int id) async {
     final response = await _client.dio.get('/posts/$id');
-    return PostDto.fromJson(response.data);
+    return PostDto.fromJson(response.data as Map<String, dynamic>);
   }
 
   @override
   Future<UserDto> getUser(int id) async {
     final response = await _client.dio.get('/users/$id');
-    return UserDto.fromJson(response.data);
+    return UserDto.fromJson(response.data as Map<String, dynamic>);
   }
 }
