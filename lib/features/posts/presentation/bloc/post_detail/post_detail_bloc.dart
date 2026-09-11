@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/result/result.dart';
+import 'package:fletter_demo_app/core/result/result.dart';
 import '../../../domain/usecases/get_post_details_usecase.dart';
 import '../../../domain/usecases/toggle_favorite_usecase.dart';
 import 'post_detail_event.dart';

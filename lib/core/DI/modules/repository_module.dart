@@ -1,7 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../network/dio_client.dart';
+import 'package:fletter_demo_app/core/network/dio_client.dart';
 import '../../../../features/posts/data/datasources/posts_local_datasource.dart';
 import '../../../../features/posts/data/datasources/posts_remote_datasource.dart';
 import '../../../../features/posts/data/repositories/posts_repository_impl.dart';

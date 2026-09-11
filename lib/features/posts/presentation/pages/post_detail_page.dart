@@ -26,7 +26,7 @@ class PostDetailPage extends StatelessWidget {
               PostDetailData(post: final post) => Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       post.title,
@@ -35,14 +35,14 @@ class PostDetailPage extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       'Author: ${post.authorName ?? 'Unknown'}',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.subtitle1?.copyWith(color: Colors.grey[700]),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.grey[700],
+                      ),
                     ),
                     const Divider(height: 32),
                     Text(
                       post.body,
-                      style: Theme.of(context).textTheme.bodyText1,
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const Spacer(),
                     SizedBox(
