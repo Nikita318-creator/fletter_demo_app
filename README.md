@@ -1,17 +1,29 @@
-# flutter_sabel
+# Flutter Clean Architecture Example Project
 
-A new Flutter project.
+Приложение для демонстрации подходов Clean Architecture, SOLID и DI.
 
-## Getting Started
+## Архитектура
 
-This project is a starting point for a Flutter application.
+Приложение разбито на 3 ключевых слоя согласно правилу направленности зависимостей:
+`Presentation -> Domain <- Data`
 
-A few resources to get you started if this is your first Flutter project:
+1. **Domain Layer**: 
+   - Не содержит зависимостей от Flutter, Dio, Hive, JSON-библиотек.
+   - Содержит бизнес-сущности (`PostEntity`), абстракции репозиториев и UseCases.
+   - Возврат данных производится через `Result<T>` (`Success` / `Failure`).
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+2. **Data Layer**:
+   - Реализует интерфейсы из Domain.
+   - Содержит DTO (`PostDto`, `UserDto`), мапперы (`PostDtoMapper`) и источники данных (`Remote`, `Local`).
+   - Исключения `DioException` трансформируются в `ServerException` в Interceptor и оборачиваются в `Failure` внутри репозитория.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+3. **Presentation Layer**:
+   - Отвечает за отображение и реакцию на действия пользователя.
+   - Логика управляется BLoC/Cubit.
+   - Виджеты используют только BLoC/Cubit, не обращаясь к репозиториям напрямую.
+
+## Запуск
+
+1. Установка зависимостей:
+   ```bash
+   flutter pub get
