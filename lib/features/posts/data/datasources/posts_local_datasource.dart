@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/storage/hive_client.dart';
 import '../../domain/entities/post_entity.dart';
 import '../models/post_dto.dart';
 
@@ -12,22 +12,22 @@ abstract interface class PostsLocalDataSource {
 }
 
 class PostsLocalDataSourceImpl implements PostsLocalDataSource {
-  final SharedPreferences _prefs;
+  final HiveClient _hiveClient;
 
-  static const _cachedPostsKey = 'CACHED_POSTS';
-  static const _favoritesKey = 'FAVORITE_POSTS';
+  static const String _cachedPostsKey = 'CACHED_POSTS';
+  static const String _favoritesKey = 'FAVORITE_POSTS';
 
-  PostsLocalDataSourceImpl(this._prefs);
+  PostsLocalDataSourceImpl(this._hiveClient);
 
   @override
   Future<void> cachePosts(List<PostDto> posts) async {
     final jsonList = posts.map((p) => p.toJson()).toList();
-    await _prefs.setString(_cachedPostsKey, jsonEncode(jsonList));
+    await _hiveClient.cachedPostsBox.put(_cachedPostsKey, jsonEncode(jsonList));
   }
 
   @override
   Future<List<PostDto>> getCachedPosts() async {
-    final jsonString = _prefs.getString(_cachedPostsKey);
+    final jsonString = _hiveClient.cachedPostsBox.get(_cachedPostsKey);
     if (jsonString == null) return [];
     final List decoded = jsonDecode(jsonString) as List;
     return decoded
@@ -43,7 +43,7 @@ class PostsLocalDataSourceImpl implements PostsLocalDataSource {
 
   @override
   Future<List<PostEntity>> getFavorites() async {
-    final jsonString = _prefs.getString(_favoritesKey);
+    final jsonString = _hiveClient.favoritesBox.get(_favoritesKey);
     if (jsonString == null) return [];
     final List decoded = jsonDecode(jsonString) as List;
     return decoded.map((e) {
@@ -82,6 +82,6 @@ class PostsLocalDataSourceImpl implements PostsLocalDataSource {
         )
         .toList();
 
-    await _prefs.setString(_favoritesKey, jsonEncode(rawList));
+    await _hiveClient.favoritesBox.put(_favoritesKey, jsonEncode(rawList));
   }
 }
