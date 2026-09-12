@@ -13,3 +13,14 @@ extension PostDtoMapper on PostDto {
     );
   }
 }
+
+extension PostEntityMapper on PostEntity {
+  PostDto toDto() {
+    return PostDto(
+      id: id,
+      userId: userId,
+      title: title,
+      body: body,
+    );
+  }
+}

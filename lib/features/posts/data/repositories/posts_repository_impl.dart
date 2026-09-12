@@ -67,8 +67,14 @@ class PostsRepositoryImpl implements PostsRepository {
   @override
   Future<Result<List<PostEntity>>> getFavoritePosts() async {
     try {
-      final favorites = await localDataSource.getFavorites();
-      return Success(favorites);
+      final favoriteDtos = await localDataSource.getFavorites();
+
+      // Датасорс вернул DTO, а Репозиторий превратил их в чистые Entity для Domain
+      final entities = favoriteDtos
+          .map((dto) => dto.toEntity(isFavorite: true))
+          .toList();
+
+      return Success(entities);
     } catch (_) {
       return const Failure(CacheFailure());
     }
@@ -77,7 +83,8 @@ class PostsRepositoryImpl implements PostsRepository {
   @override
   Future<Result<void>> toggleFavorite(PostEntity post) async {
     try {
-      await localDataSource.toggleFavorite(post);
+      // Репозиторий превращает Entity обратно в DTO для Data-слоя
+      await localDataSource.toggleFavorite(post.toDto());
       return const Success(null);
     } catch (_) {
       return const Failure(CacheFailure());
