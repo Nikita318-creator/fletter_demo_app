@@ -14,85 +14,95 @@ class PostsListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<PostsListBloc>()..add(const FetchPostsEvent()),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Posts'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.favorite),
-              onPressed: () async {
-                await context.push(AppRoutes.favorites);
-                if (context.mounted) {
-                  context.read<PostsListBloc>().add(const RefreshPostsEvent());
-                }
-              },
-            ),
-          ],
-        ),
-        body: BlocBuilder<PostsListBloc, PostsListState>(
-          builder: (context, state) {
-            return switch (state) {
-              PostsListInitial() || PostsListLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              PostsListEmpty() => const Center(child: Text('No posts found')),
-              PostsListError(message: final msg) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(msg),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<PostsListBloc>().add(
-                          const FetchPostsEvent(),
-                        );
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
-              PostsListData(posts: final posts) => RefreshIndicator(
-                onRefresh: () async {
-                  context.read<PostsListBloc>().add(const RefreshPostsEvent());
-                },
-                child: ListView.builder(
-                  itemCount: posts.length,
-                  itemBuilder: (context, index) {
-                    final post = posts[index];
-                    return ListTile(
-                      title: Text(
-                        post.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        post.body,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: post.isFavorite
-                          ? const Icon(Icons.favorite, color: Colors.red)
-                          : null,
-                      onTap: () async {
-                        await context.push(
-                          AppRoutes.postDetail,
-                          extra: post.id,
-                        );
-                        if (context.mounted) {
-                          context.read<PostsListBloc>().add(
-                            const RefreshPostsEvent(),
-                          );
-                        }
-                      },
-                    );
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Posts'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.favorite),
+                  onPressed: () async {
+                    await context.push(AppRoutes.favorites);
+                    if (context.mounted) {
+                      context.read<PostsListBloc>().add(
+                        const RefreshPostsEvent(),
+                      );
+                    }
                   },
                 ),
-              ),
-            };
-          },
-        ),
+              ],
+            ),
+            body: BlocBuilder<PostsListBloc, PostsListState>(
+              builder: (context, state) {
+                return switch (state) {
+                  PostsListInitial() || PostsListLoading() => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  PostsListEmpty() => const Center(
+                    child: Text('No posts found'),
+                  ),
+                  PostsListError(message: final msg) => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(msg),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<PostsListBloc>().add(
+                              const FetchPostsEvent(),
+                            );
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PostsListData(posts: final posts) => RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<PostsListBloc>().add(
+                        const RefreshPostsEvent(),
+                      );
+                    },
+                    child: ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+                        return ListTile(
+                          title: Text(
+                            post.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            post.body,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: post.isFavorite
+                              ? const Icon(Icons.favorite, color: Colors.red)
+                              : null,
+                          onTap: () async {
+                            await context.push(
+                              AppRoutes.postDetail,
+                              extra: post.id,
+                            );
+                            if (context.mounted) {
+                              context.read<PostsListBloc>().add(
+                                const RefreshPostsEvent(),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                };
+              },
+            ),
+          );
+        },
       ),
     );
   }

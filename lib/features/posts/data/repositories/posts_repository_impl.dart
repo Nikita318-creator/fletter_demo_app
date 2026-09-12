@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../../../core/network/network_exception.dart';
 import '../../../../core/result/result.dart';
 import '../../domain/entities/post_entity.dart';
@@ -41,7 +42,7 @@ class PostsRepositoryImpl implements PostsRepository {
         }
         return Failure(_mapExceptionToFailure(e));
       } catch (_) {
-        return const Failure(CacheFailure());
+        return Failure(_mapExceptionToFailure(e));
       }
     }
   }
@@ -60,7 +61,20 @@ class PostsRepositoryImpl implements PostsRepository {
 
       return Success(entity);
     } catch (e) {
-      return Failure(_mapExceptionToFailure(e));
+      try {
+        final cachedPosts = await localDataSource.getCachedPosts();
+        final cachedPost = cachedPosts.firstWhere((dto) => dto.id == id);
+        final favoriteIds = await localDataSource.getFavoriteIds();
+
+        final entity = cachedPost.toEntity(
+          authorName: null,
+          isFavorite: favoriteIds.contains(cachedPost.id),
+        );
+
+        return Success(entity);
+      } catch (_) {
+        return Failure(_mapExceptionToFailure(e));
+      }
     }
   }
 
@@ -69,7 +83,6 @@ class PostsRepositoryImpl implements PostsRepository {
     try {
       final favoriteDtos = await localDataSource.getFavorites();
 
-      // Датасорс вернул DTO, а Репозиторий превратил их в чистые Entity для Domain
       final entities = favoriteDtos
           .map((dto) => dto.toEntity(isFavorite: true))
           .toList();
@@ -83,7 +96,6 @@ class PostsRepositoryImpl implements PostsRepository {
   @override
   Future<Result<void>> toggleFavorite(PostEntity post) async {
     try {
-      // Репозиторий превращает Entity обратно в DTO для Data-слоя
       await localDataSource.toggleFavorite(post.toDto());
       return const Success(null);
     } catch (_) {
@@ -92,7 +104,9 @@ class PostsRepositoryImpl implements PostsRepository {
   }
 
   AppFailure _mapExceptionToFailure(Object e) {
-    if (e is NoInternetException || e is TimeoutException) {
+    final exception = e is DioException ? e.error : e;
+
+    if (exception is NoInternetException || exception is TimeoutException) {
       return const NetworkFailure();
     }
     return const ServerFailure();
