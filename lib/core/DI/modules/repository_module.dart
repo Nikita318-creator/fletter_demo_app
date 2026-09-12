@@ -12,7 +12,7 @@ import '../../../../features/posts/domain/usecases/get_posts_usecase.dart';
 import '../../../../features/posts/domain/usecases/toggle_favorite_usecase.dart';
 
 void initRepositoryModule(GetIt sl) {
-  // Data Sources (абстракция -> реализация)
+  // Data Sources
   sl.registerLazySingleton<PostsRemoteDataSource>(
     () => PostsRemoteDataSourceImpl(sl<DioClient>()),
   );
@@ -21,7 +21,7 @@ void initRepositoryModule(GetIt sl) {
     () => PostsLocalDataSourceImpl(sl<HiveClient>()),
   );
 
-  // Repository (абстракция -> реализация)
+  // Repositories
   sl.registerLazySingleton<PostsRepository>(
     () => PostsRepositoryImpl(
       remoteDataSource: sl<PostsRemoteDataSource>(),

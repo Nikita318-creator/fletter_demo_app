@@ -22,31 +22,56 @@ class FavoritesPage extends StatelessWidget {
               FavoritesInitial() || FavoritesLoading() => const Center(
                 child: CircularProgressIndicator(),
               ),
-              FavoritesEmpty() => const Center(
-                child: Text('No favorite posts yet'),
-              ),
-              FavoritesError(message: final msg) => Center(child: Text(msg)),
-              FavoritesData(posts: final posts) => ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index];
-                  return ListTile(
-                    title: Text(
-                      post.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(
-                      post.body,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: const Icon(Icons.favorite, color: Colors.red),
-                    onTap: () {
-                      context.push(AppRoutes.postDetail, extra: post.id);
-                    },
+              FavoritesEmpty() => RefreshIndicator(
+                onRefresh: () async {
+                  context.read<FavoritesBloc>().add(
+                    const FetchFavoritesEvent(),
                   );
                 },
+                child: ListView(
+                  children: const [
+                    SizedBox(height: 200),
+                    Center(child: Text('No favorite posts yet')),
+                  ],
+                ),
+              ),
+              FavoritesError(message: final msg) => Center(child: Text(msg)),
+              FavoritesData(posts: final posts) => RefreshIndicator(
+                onRefresh: () async {
+                  context.read<FavoritesBloc>().add(
+                    const FetchFavoritesEvent(),
+                  );
+                },
+                child: ListView.builder(
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    final post = posts[index];
+                    return ListTile(
+                      title: Text(
+                        post.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        post.body,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: const Icon(Icons.favorite, color: Colors.red),
+                      onTap: () async {
+                        await context.push(
+                          AppRoutes.postDetail,
+                          extra: post.id,
+                        );
+                        if (context.mounted) {
+                          context.read<FavoritesBloc>().add(
+                            const FetchFavoritesEvent(),
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
             };
           },

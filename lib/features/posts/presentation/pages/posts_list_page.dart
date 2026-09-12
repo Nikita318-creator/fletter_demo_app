@@ -20,7 +20,12 @@ class PostsListPage extends StatelessWidget {
           actions: [
             IconButton(
               icon: const Icon(Icons.favorite),
-              onPressed: () => context.push(AppRoutes.favorites),
+              onPressed: () async {
+                await context.push(AppRoutes.favorites);
+                if (context.mounted) {
+                  context.read<PostsListBloc>().add(const RefreshPostsEvent());
+                }
+              },
             ),
           ],
         ),
@@ -28,55 +33,63 @@ class PostsListPage extends StatelessWidget {
           builder: (context, state) {
             return switch (state) {
               PostsListInitial() || PostsListLoading() => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              PostsListEmpty() => const Center(
-                  child: Text('No posts found'),
-                ),
+                child: CircularProgressIndicator(),
+              ),
+              PostsListEmpty() => const Center(child: Text('No posts found')),
               PostsListError(message: final msg) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(msg),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.read<PostsListBloc>().add(const FetchPostsEvent());
-                        },
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(msg),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<PostsListBloc>().add(
+                          const FetchPostsEvent(),
+                        );
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
+              ),
               PostsListData(posts: final posts) => RefreshIndicator(
-                  onRefresh: () async {
-                    context.read<PostsListBloc>().add(const RefreshPostsEvent());
+                onRefresh: () async {
+                  context.read<PostsListBloc>().add(const RefreshPostsEvent());
+                },
+                child: ListView.builder(
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    final post = posts[index];
+                    return ListTile(
+                      title: Text(
+                        post.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        post.body,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: post.isFavorite
+                          ? const Icon(Icons.favorite, color: Colors.red)
+                          : null,
+                      onTap: () async {
+                        await context.push(
+                          AppRoutes.postDetail,
+                          extra: post.id,
+                        );
+                        if (context.mounted) {
+                          context.read<PostsListBloc>().add(
+                            const RefreshPostsEvent(),
+                          );
+                        }
+                      },
+                    );
                   },
-                  child: ListView.builder(
-                    itemCount: posts.length,
-                    itemBuilder: (context, index) {
-                      final post = posts[index];
-                      return ListTile(
-                        title: Text(
-                          post.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          post.body,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: post.isFavorite
-                            ? const Icon(Icons.favorite, color: Colors.red)
-                            : null,
-                        onTap: () {
-                          context.push(AppRoutes.postDetail, extra: post.id);
-                        },
-                      );
-                    },
-                  ),
                 ),
+              ),
             };
           },
         ),
