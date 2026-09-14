@@ -1,8 +1,8 @@
 import 'package:go_router/go_router.dart';
 
-import '../../presentation/pages/favorites_page.dart';
-import '../../presentation/pages/post_detail_page.dart';
-import '../../presentation/pages/posts_list_page.dart';
+import '/presentation/pages/favorites_page.dart';
+import '/presentation/pages/post_detail_page.dart';
+import '/presentation/pages/posts_list_page.dart';
 
 abstract final class AppRoutes {
   static const posts = '/';
