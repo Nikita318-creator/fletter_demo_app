@@ -3,12 +3,12 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:fletter_demo_app/core/network/network_exception.dart';
 import 'package:fletter_demo_app/core/result/result.dart';
-import 'package:fletter_demo_app/features/posts/data/datasources/posts_local_datasource.dart';
-import 'package:fletter_demo_app/features/posts/data/datasources/posts_remote_datasource.dart';
-import 'package:fletter_demo_app/features/posts/data/mappers/post_mapper.dart';
-import 'package:fletter_demo_app/features/posts/data/models/post_dto.dart';
-import 'package:fletter_demo_app/features/posts/data/repositories/posts_repository_impl.dart';
-import 'package:fletter_demo_app/features/posts/domain/entities/post_entity.dart';
+import 'package:fletter_demo_app/data/datasources/posts_local_datasource.dart';
+import 'package:fletter_demo_app/data/datasources/posts_remote_datasource.dart';
+import 'package:fletter_demo_app/data/mappers/post_mapper.dart';
+import 'package:fletter_demo_app/data/models/post_dto.dart';
+import 'package:fletter_demo_app/data/repositories/posts_repository_impl.dart';
+import 'package:fletter_demo_app/domain/entities/post_entity.dart';
 
 class MockPostsRemoteDataSource extends Mock implements PostsRemoteDataSource {}
 

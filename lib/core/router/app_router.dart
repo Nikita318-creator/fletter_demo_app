@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/posts/domain/entities/post_entity.dart';
-import '../../features/posts/presentation/pages/favorites_page.dart';
-import '../../features/posts/presentation/pages/post_detail_page.dart';
-import '../../features/posts/presentation/pages/posts_list_page.dart';
+
+import '../../presentation/pages/favorites_page.dart';
+import '../../presentation/pages/post_detail_page.dart';
+import '../../presentation/pages/posts_list_page.dart';
 
 abstract final class AppRoutes {
   static const posts = '/';
